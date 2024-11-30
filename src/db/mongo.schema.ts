@@ -4,6 +4,8 @@ import { ramdonString } from '../utils';
 import { IRoleDb } from './interface/role.interface';
 import { IUserRoleDb } from './interface/userRole.interface';
 import { encrypt } from '../utils/bcrypt';
+import { IVehicleDb } from './interface/vehicle.interface';
+import { IRepairLogDb } from './interface/repairLog.interface';
 
 const userSchema = new Schema<IUserDb>(
 	{
@@ -41,6 +43,41 @@ const userRoleSchema = new Schema<IUserRoleDb>(
 	}
 );
 
+const vehicleSchema = new Schema<IVehicleDb>(
+	{
+		make: { type: String, required: true, trim: true },
+		model: { type: String, required: true, trim: true },
+		year: { type: Number, required: true, trim: true },
+		category: { type: String, required: true, trim: true },
+		licensePlate: { type: String, required: true, trim: true, unique: true },
+		registrationDate: { type: Date, required: true, trim: true },
+		notes: { type: String, trim: true },
+		ownerId: { type: Schema.Types.ObjectId, ref: 'Owner' }
+	},
+	{
+		timestamps: true,
+		versionKey: false
+	}
+);
+
+const repairLogSchema = new Schema<IRepairLogDb>(
+	{
+		vehicle: { type: Schema.Types.ObjectId, ref: 'Vehicle', required: true },
+		repairNumber: { type: String, required: true },
+		technicalReview: { type: String },
+		observation: { type: String },
+		subTotal: { type: Number, required: true },
+		discount: { type: Number },
+		total: { type: Number, required: true },
+		paymentType: { type: String, required: true },
+		repairStatus: { type: String, required: true, default: 'pending' }
+	},
+	{
+		timestamps: true,
+		versionKey: false
+	}
+);
+
 userSchema.pre<IUserDb>('save', async function (next) {
 	if (!this.token) {
 		this.token = ramdonString(25);
@@ -52,5 +89,7 @@ userSchema.pre<IUserDb>('save', async function (next) {
 const UserModel = model<IUserDb>('User', userSchema, 'users');
 const RoleModel = model<IRoleDb>('Role', roleSchema, 'roles');
 const UserRoleModel = model<IUserRoleDb>('UserRole', userRoleSchema, 'user_role');
+const VehicleModel = model<IVehicleDb>('Vehicle', vehicleSchema, 'vehicles');
+const RepairLogModel = model<IRepairLogDb>('RepairLog', repairLogSchema, 'repair_log');
 
-export { UserModel, RoleModel, UserRoleModel };
+export { UserModel, RoleModel, UserRoleModel, VehicleModel, RepairLogModel };

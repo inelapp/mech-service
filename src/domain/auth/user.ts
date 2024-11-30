@@ -2,6 +2,7 @@ import { err, ok, Result } from 'neverthrow';
 import { validateUserSchema } from './user.validation';
 
 export interface IUserProps {
+	id?: string;
 	username: string;
 	password: string;
 	email?: string;
